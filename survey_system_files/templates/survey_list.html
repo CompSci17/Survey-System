@@ -1,0 +1,19 @@
+{% extends "_layouts/base.html" %}
+
+{% block page_title %} {{ page_title }} {% endblock %}
+
+{% block page_content %}
+	<h1> {{ page_title }} </h1>
+
+	<ul>
+		{% for survey in survey_list %}
+
+			<li><a href="{% url 'survey_detail' survey.pk %}" > {{ survey.title }} </a></li>
+
+		{% empty %}
+
+			<li>Sorry, no surveys yet. Check back soon!</li>
+
+		{% endfor %}
+	</ul>
+{% endblock %}
