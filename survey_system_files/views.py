@@ -32,9 +32,10 @@ def survey_detail( request, pk, *args, **kwargs ):
 				answer = Answers( )
 				answer.survey = survey
 				answer.question = question
-				answer.text = request.POST[ str(question.pk) ]
+				answer.text = request.POST.get( str(question.pk), "" )
 				answer.session_id = uuid.uuid1( ) 
 				answer.save()
+				output = request.POST.get( str(question.pk), "" )
 
 			# redirect to a new URL:
 			#return HttpResponseRedirect('/thanks/')
