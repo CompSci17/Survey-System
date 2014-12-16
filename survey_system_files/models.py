@@ -26,11 +26,12 @@ class Question( models.Model ):
 
 
 	types_of_input = (
-		("select", "select"),			# For "order of importance" questions
-		("radio", "radio"),				# Single choice, multiple answer questions
-		("checkbox", "checkbox"),		# Multiple choice questions
-		("text", "text"),				# Short open questions
-		("textarea", "textarea")		# Long open questions
+		("select", "Dropdown select"),						# For "order of importance" questions
+		("radio", "Single choice, radio buttons"),			# Single choice, multiple answer questions
+		("checkbox", "Multiple choice, checkboxes"),		# Multiple choice questions
+		("text", "Short answer, text input"),				# Short open questions
+		("textarea", "Long answer, text box"),				# Long open questions
+		("order", "Order of importance")
 	)
 
 	input_type = models.CharField( max_length = 50, default = "text", choices = types_of_input )
