@@ -58,4 +58,3 @@ private.py
 db.*
 sftp*
 *migrations*
-webhook*
