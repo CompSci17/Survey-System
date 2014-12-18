@@ -32,7 +32,12 @@ def survey_detail( request, pk, *args, **kwargs ):
 				answer = Answers( )
 				answer.survey = survey
 				answer.question = question
-				answer.text = request.POST.get( str(question.pk), "" )
+				answers = request.POST.getlist( str(question.pk), "" )
+
+				for individualAnswer in answers:
+					answer.text = answer.text + individualAnswer + ", "
+
+				answer.text = answer.text[:-2]
 				answer.session_id = uuid.uuid1( ) 
 				answer.save()
 				output = request.POST.get( str(question.pk), "" )
