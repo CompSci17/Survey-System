@@ -2,10 +2,25 @@
 <html>
 <head>
 	<title>{% block page_title %}{% endblock %}</title>
+	<meta charset="utf-8">
 	<meta>
-	<meta>
+
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="/static/css/survey.css">
+	{% block extra_css %}{% endblock %}
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+	{% block extra_js %}{% endblock %}
 </head>
 <body>
-	{% block page_content %}{% endblock %}
+	<div id="wrapper">
+		<figure  class="logo">
+			<a href="{% url 'survey_list' %}"><img src="/static/images/logo_black.png"/></a>
+		</figure>
+
+		{% block page_content %}{% endblock %}
+	</div>
 </body>
 </html>

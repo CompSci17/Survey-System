@@ -2,18 +2,25 @@
 
 {% block page_title %}{{ page_title }}{% endblock %}
 
+{% block extra_js %}
+	<script type="text/javascript" src="/static/js/survey.js" ></script>
+{% endblock %}
+
 {% block page_content %}
 
 	<h1> {{ page_title }} </h1>
 	<p> {{ survey.updated_at }}</p>
 
 	<form action="" method="post">{% csrf_token %}
-		{{ form.as_p }}
-		 <input type="submit" value="Send message" />
+		{% for field in form %}
+			<section class="q-and-a">
+				{{ field.errors }}
+       			{{ field.label_tag }} 
+       			{{ field }}
+			</section>
+		{% endfor %}
+		 <input type="submit" value="Finish" />
 	</form>
 
-
-	<h1>{{ answers }}</h1>
-
-	<h1>{{ posted }}</h1>
+	<h1>{{ output }}</h1>
 {% endblock %}
