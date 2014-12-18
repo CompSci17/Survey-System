@@ -9,37 +9,47 @@ class SurveyForm( forms.Form ):
 
 	def add_questions( self, questions ):
 		for question in questions:
-			required = question.required
+			required = 'required' if question.required else ''
 
 			if question.input_type == 'text':
-				self.fields['%s' % question.id] = forms.CharField(max_length=255, label= question.text, required = required)
+				self.fields['%s' % question.id] = forms.CharField(max_length=255, label= question.text, required = True, widget = forms.TextInput( attrs = { required: required } ))
 
 			elif question.input_type == 'textarea':
-				self.fields['%s' % question.id] = forms.CharField(label= question.text, required = required, widget = forms.Textarea() )
+				self.fields['%s' % question.id] = forms.CharField(label= question.text, widget = forms.Textarea( attrs = { required: required } ) )
 
 			elif question.input_type == 'radio':
 				CHOICES = self.get_choices( question.choices )
 
-				self.fields['%s' % question.id] = forms.ChoiceField(label= question.text, choices=CHOICES, widget=forms.RadioSelect(), required = required)
+				self.fields['%s' % question.id] = forms.ChoiceField(
+													label = question.text, 
+													choices = CHOICES, 
+													widget = forms.RadioSelect( attrs = { 'checked': 'checked', required: required } )												)
 
 			elif question.input_type == 'select':
 				CHOICES = self.get_choices( question.choices )
 
-				self.fields['%s' % question.id] = forms.ChoiceField(label= question.text, choices = CHOICES,  widget=forms.Select(attrs={'required': required}))
+				self.fields['%s' % question.id] = forms.ChoiceField(label= question.text, choices = CHOICES,  widget=forms.Select(attrs={ 'checked': 'checked' }), required = True )
 
 			elif question.input_type == 'checkbox':
 				CHOICES = self.get_choices( question.choices )
 
-				self.fields['%s' % question.id] = forms.MultipleChoiceField(label= question.text, choices = CHOICES, widget=forms.CheckboxSelectMultiple(), required = required)
+				self.fields['%s' % question.id] = forms.MultipleChoiceField(
+													label= question.text, 
+													choices = CHOICES, 
+													widget=forms.SelectMultiple( 
+														attrs = { 'checked': 'checked', 'class' : 'multiple-choice' } 
+													)
+												)
 
 			elif question.input_type == 'order':
 				CHOICES = self.get_choices( question.choices )
 
 				self.fields['%s' % question.id] = forms.MultipleChoiceField(label= question.text, 
-																	choices=CHOICES, 
-																	widget=forms.CheckboxSelectMultiple(attrs={'class': "sortable"}),
-																	required = required,
-																	)
+													choices=CHOICES, 
+													widget=forms.CheckboxSelectMultiple(
+														attrs={'class': "sortable", 'checked': 'checked' }
+													),
+												)
 
 	def get_choices( self, choices ):
 		CHOICES=[]
