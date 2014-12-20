@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from .models import Survey, Question, Answers
 from .forms import SurveyForm
-
+from .results import Results
 
 # Create your views here.
 
@@ -30,6 +30,7 @@ def survey_detail( request, pk, *args, **kwargs ):
 		
 		# check whether it's valid:
 		if form.is_valid():
+			answers = []
 			for question in questions:
 				answer = Answers( )
 				answer.survey = survey
@@ -60,4 +61,53 @@ def survey_detail( request, pk, *args, **kwargs ):
 	}
 
 	return render( request, template_name, context )
+
+def survey_results( request, pk, *args, **kwargs ):
+	survey = Survey.objects.get( pk = pk, published = True )
+	questions = Question.objects.filter( survey__exact = survey )
+	template_name = "survey_results.html"
+
+	results = Results( )
+	answers = results.render_results( questions, survey )
+	output = ''
+
+	charts = []
+	chart_ids = ""
+
+	for input_type, answer, input_id in answers:
+		if input_type == "text" or input_type == "textarea":
+
+			question = Question.objects.get( pk = input_id )
+			output += """
+						<table>
+							<tr>
+								<th> %s </th>
+							</tr>
+					  """ % ( question.text )
+
+ 			for indiv_answer in answer:
+ 				output += """
+							<tr>
+								<td> %s </td>
+							</tr>
+						  """ % ( indiv_answer )
+
+ 			output += """
+						</table>
+					   """
+		else:
+			charts.append( answer )
+			chart_ids += "container_" + str( input_id ) + ","
+			output += " \n <div id='container_" + str( input_id ) + "'> Chart </div>"
+
+	context = {
+		"page_title": survey.title + " Results",
+		"answers": answers,
+		"output": output,
+		"charts": charts,
+		"chart_ids": chart_ids
+	}
+
+	return render( request, template_name, context )
+
 
