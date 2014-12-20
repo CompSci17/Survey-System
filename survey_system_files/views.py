@@ -23,33 +23,34 @@ def survey_detail( request, pk, *args, **kwargs ):
 	survey = Survey.objects.get( pk = pk, published = True )
 	questions = Question.objects.filter( survey__exact = survey )
 	template_name = "survey_detail.html"
+	form = SurveyForm( request.POST or None, questions=questions )
 
 	# if this is a POST request we need to process the form data
 	if request.method == 'POST':
-		form = SurveyForm( request.POST )
+		
 		# check whether it's valid:
 		if form.is_valid():
 			for question in questions:
 				answer = Answers( )
 				answer.survey = survey
 				answer.question = question
-				answers = request.POST.getlist( str(question.pk), "" )
 
-				for individualAnswer in answers:
-					answer.text = answer.text + individualAnswer + ", "
+				answers = form.cleaned_data[ str( question.pk ) ]
 
-				answer.text = answer.text[:-2]
+				if type( answers ) is list:
+					for individualAnswer in answers:
+						answer.text = answer.text + individualAnswer + ", "
+					answer.text = answer.text[:-2]
+					answer.text = answer.text.replace("  ", "").replace(", ", "")
+
+				else:
+					answer.text = answers
+
 				answer.session_id = uuid.uuid1( ) 
 				answer.save()
 
 			# redirect to a new URL:
 			#return HttpResponseRedirect('/thanks/')
-
-	# if a GET (or any other method) we'll create a blank form
-	else:
-		form = SurveyForm( )
-
-	form.add_questions( questions )
 
 
 	context = {
