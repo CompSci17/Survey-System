@@ -55,3 +55,28 @@ class Answers( models.Model ):
 
 	def save(self, *args, **kwargs):
 		super(Answers, self).save(*args, **kwargs)
+
+class RadioResults( models.Model ):
+	survey = models.ForeignKey( 'Survey' )
+	question = models.ForeignKey( 'Question' )
+	answer = models.TextField( default = '', null = True )
+	answer_position = models.IntegerField( default = 0)
+	answer_count = models.IntegerField( default = 0 )
+
+	def save(self, *args, **kwargs):
+		super(RadioResults, self).save(*args, **kwargs)
+
+
+class SelectResults( models.Model ):
+	survey = models.ForeignKey( 'Survey' )
+	question = models.ForeignKey( 'Question' )
+	answer = models.TextField( default = '', null = True )
+	answer_position = models.IntegerField( default = 0)
+	answer_count = models.IntegerField( default = 0 )
+
+	def save(self, *args, **kwargs):
+		super(SelectResults, self).save(*args, **kwargs)
+
+
+
+
