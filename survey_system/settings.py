@@ -40,7 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'survey_system_files',
-    'pytz'
+    'pytz',
+    'captcha'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -76,6 +77,11 @@ USE_I18N = private.USE_I18N
 USE_L10N = private.USE_L10N
 
 USE_TZ = private.USE_TZ
+
+STATICFILES_DIRS = private.STATICFILES_DIRS
+
+RECAPTCHA_PUBLIC_KEY = private.RECAPTCHA_PUBLIC_KEY
+RECAPTCHA_PRIVATE_KEY = private.RECAPTCHA_PRIVATE_KEY
 
 
 # Static files (CSS, JavaScript, Images)
