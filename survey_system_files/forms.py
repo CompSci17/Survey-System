@@ -1,5 +1,6 @@
 from django import forms
 from .models import Question
+from captcha.fields import ReCaptchaField
 
 
 class SurveyForm( forms.Form ):
@@ -50,6 +51,8 @@ class SurveyForm( forms.Form ):
 														attrs={'class': "sortable", 'checked': 'checked' }
 													),
 												)
+		self.fields['captcha'] = ReCaptchaField( attrs={'theme' : 'clean'} )
+
 
 	def get_choices( self, choices ):
 		CHOICES=[]
