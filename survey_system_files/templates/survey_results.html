@@ -1,0 +1,23 @@
+{% extends "_layouts/base.html" %}
+
+{% block page_title %} {{ page_title }} {% endblock %}
+
+
+{% block extra_css %}
+
+{% endblock %}
+
+{% block extra_js %}
+	<script type="text/javascript" src="http://code.highcharts.com/highcharts.js" ></script>
+	{% load chartit %}
+	{{ charts|load_charts:chart_ids }}
+{% endblock %}
+
+
+{% block page_content %}
+	<h1> {{ page_title }} </h1>
+
+	<section id="results">
+		{% autoescape off %}{{ output }}{% endautoescape %} 
+	</section>
+{% endblock %}
