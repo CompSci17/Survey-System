@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from .models import Survey, Question, Answers
 from .forms import SurveyForm
 
+
 # Create your views here.
 
 def survey_list( request, *args, **kwargs ):
@@ -40,7 +41,6 @@ def survey_detail( request, pk, *args, **kwargs ):
 				answer.text = answer.text[:-2]
 				answer.session_id = uuid.uuid1( ) 
 				answer.save()
-				output = request.POST.get( str(question.pk), "" )
 
 			# redirect to a new URL:
 			#return HttpResponseRedirect('/thanks/')
@@ -48,7 +48,6 @@ def survey_detail( request, pk, *args, **kwargs ):
 	# if a GET (or any other method) we'll create a blank form
 	else:
 		form = SurveyForm( )
-
 
 	form.add_questions( questions )
 
