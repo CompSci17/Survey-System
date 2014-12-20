@@ -41,7 +41,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'survey_system_files',
     'pytz',
-    'captcha'
+    'captcha',
+    'chartit'
 )
 
 MIDDLEWARE_CLASSES = (
