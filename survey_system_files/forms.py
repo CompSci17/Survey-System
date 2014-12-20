@@ -4,11 +4,11 @@ from captcha.fields import ReCaptchaField
 
 
 class SurveyForm( forms.Form ):
+
 	def __init__(self, *args, **kwargs):
+		questions = kwargs.pop('questions')
 		super(SurveyForm, self).__init__(*args, **kwargs)
 
-
-	def add_questions( self, questions ):
 		for question in questions:
 			required = 'required' if question.required else ''
 
@@ -24,7 +24,7 @@ class SurveyForm( forms.Form ):
 				self.fields['%s' % question.id] = forms.ChoiceField(
 													label = question.text, 
 													choices = CHOICES, 
-													widget = forms.RadioSelect( attrs = { 'checked': 'checked', required: required } )												)
+													widget = forms.RadioSelect( attrs = { required: required } )												)
 
 			elif question.input_type == 'select':
 				CHOICES = self.get_choices( question.choices )
@@ -37,8 +37,8 @@ class SurveyForm( forms.Form ):
 				self.fields['%s' % question.id] = forms.MultipleChoiceField(
 													label= question.text, 
 													choices = CHOICES, 
-													widget=forms.SelectMultiple( 
-														attrs = { 'checked': 'checked', 'class' : 'multiple-choice' } 
+													widget=forms.CheckboxSelectMultiple( 
+														attrs = { 'class' : 'multiple-choice' } 
 													)
 												)
 
@@ -52,7 +52,6 @@ class SurveyForm( forms.Form ):
 													),
 												)
 		self.fields['captcha'] = ReCaptchaField( attrs={'theme' : 'clean'} )
-
 
 	def get_choices( self, choices ):
 		CHOICES=[]
