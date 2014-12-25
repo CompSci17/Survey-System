@@ -10,13 +10,13 @@ from .results import Results
 # Create your views here.
 
 def survey_list( request, *args, **kwargs ):
+	# Get a list of all the surveys
 	survey_list = Survey.objects.filter( published = True )
+
 	template_name = "survey_list.html"
-	debug = str( request.COOKIES )
 	context = {
 		"survey_list": survey_list,
-		"page_title": "Surveys",
-		"debug": debug
+		"page_title": "Surveys"
 	}
 
 	return render( request, template_name, context )
