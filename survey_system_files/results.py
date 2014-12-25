@@ -1,4 +1,4 @@
-from .models import Answers, RadioResults, SelectResults
+from .models import Answers, RadioResults, SelectResults, ImportanceOrderResults, CheckboxResults
 from chartit import DataPool, Chart
 
 class Results( ):
@@ -164,14 +164,96 @@ class Results( ):
 				
 
 			elif question.input_type == 'checkbox':
-				# TODO
+				answers = self.get_results( question )
+				counter = {}
 				options = self.get_choices( question.choices )
 
+				for option in options:
+					counter.update( { option.strip() : 0 } )
+
+				for answer in answers:
+					delimited_answers = answer.text.split( "," )
+
+					for indiv_answer in delimited_answers:
+						counter[ indiv_answer.strip() ] += 1
+
+				for option in counter:
+					existence_check = CheckboxResults.objects.filter(
+										survey__exact = survey, 
+										question__exact = question, 
+										answer__exact = option.strip()
+									)
+
+					if existence_check.exists():
+						result = CheckboxResults(
+									pk = existence_check[0].pk,
+									survey = survey,
+									question = question,
+									answer = option,
+									answer_count = counter[ option.strip() ]
+								)
+					else:
+						result = CheckboxResults(
+									survey = survey,
+									question = question,
+									answer = option,
+									answer_count = counter[ option.strip() ]
+								)
+					result.save()
 				
+				bar_chart = self.checkbox_bar_chart( question )
+				output.append( ( "checkbox", bar_chart, question.pk ) )
 
 			elif question.input_type == 'order':
 				# TODO
 				options = self.get_choices( question.choices )
+
+				number_of_options = len( options )
+
+				counter = {}
+
+				for integer_counter in range( 1, number_of_options + 1 ):
+					counter.update( { integer_counter: { } } )
+					for option in options:
+						counter[ integer_counter ].update( { str( option ).strip().replace( ",", "" ) : 0 } )
+
+				answers = self.get_results( question )
+
+				for answer in answers:
+					split_answers = answer.text.split( "," )
+					for i, result in enumerate( split_answers ):
+						counter[ i + 1 ][ result.strip().replace( ",", "" ) ] += 1
+
+				for position in counter:
+
+					for option in counter[ position ]:
+						existence_check = ImportanceOrderResults.objects.filter(
+											survey__exact = survey, 
+											question__exact = question, 
+											answer__exact = option.strip().replace( ",", "" ),
+											answer_position__exact = position
+										)
+
+						if existence_check.exists():
+							result = ImportanceOrderResults(
+										pk = existence_check[0].pk,
+										survey = survey,
+										question = question,
+										answer = option.strip().replace( ",", "" ),
+										answer_position = position,
+										answer_count = counter[ position ][ str( option ).strip().replace( ",", "" ) ]
+									)
+						else:
+							result = ImportanceOrderResults(
+										survey = survey,
+										question = question,
+										answer = option.strip().replace( ",", "" ),
+										answer_position = position,
+										answer_count = counter[ position ][ str( option ).strip().replace( ",", "" ) ]
+									)
+						result.save()
+
+				output.append( ( "order_of_importance", counter, str( question.pk ) ) )
 
 		return output
 
@@ -271,4 +353,63 @@ class Results( ):
 					}
 				}
 			)
+		return chart
+
+	def order_of_importance_chart( request, question, position ):
+		ds = DataPool(
+		       series=
+		        [{'options': {
+		            'source': ImportanceOrderResults.objects.filter( question__exact = question, answer_position__exact = position )},
+		          'terms': [
+		            'answer_position',
+		            'answer', 
+		            'answer_count']}
+		         ])
+
+		chart = Chart(
+		        datasource = ds, 
+		        series_options = 
+		          [{'options':{
+		              'type': 'bar',
+		              'stacking': True,
+		              'stack': 0},
+		            'terms':{
+		              'answer_position': [
+		                'answer_count',]
+		              }}],
+		        chart_options = 
+		          {'title': {
+		               'text': question.text },
+		           'xAxis': {
+		                'title': {
+		                   'text': 'Answer Position'}}})
+		return chart
+
+	def checkbox_bar_chart( request, question ):
+		ds = DataPool(
+		       series=
+		        [{'options': {
+		            'source': CheckboxResults.objects.filter( question__exact = question ) },
+		          'terms': [
+		            'answer',
+		            'answer_count']}
+		         ])
+
+		chart = Chart(
+		        datasource = ds, 
+		        series_options = 
+		          [{'options':{
+		              'type': 'column',
+		              'stacking': True},
+		            'terms':{
+		              'answer': [
+		                'answer_count']
+		              }}],
+		        chart_options = 
+		          {'title': {
+		               'text': question.text },
+		           'xAxis': {
+		                'title': {
+		                   'text': 'Answers'}}})
+
 		return chart

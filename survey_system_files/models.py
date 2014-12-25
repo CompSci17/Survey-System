@@ -77,6 +77,22 @@ class SelectResults( models.Model ):
 	def save(self, *args, **kwargs):
 		super(SelectResults, self).save(*args, **kwargs)
 
+class ImportanceOrderResults( models.Model ):
+	survey = models.ForeignKey( 'Survey' )
+	question = models.ForeignKey( 'Question' )
+	answer = models.TextField( default = '', null = True )
+	answer_position = models.IntegerField( default = 0)
+	answer_count = models.IntegerField( default = 0 )
 
+	def save(self, *args, **kwargs):
+		super(ImportanceOrderResults, self).save(*args, **kwargs)
 
+class CheckboxResults( models.Model ):
+	survey = models.ForeignKey( 'Survey' )
+	question = models.ForeignKey( 'Question' )
+	answer = models.TextField( default = '', null = True )
+	answer_count = models.IntegerField( default = 0 )
+
+	def save(self, *args, **kwargs):
+		super(CheckboxResults, self).save(*args, **kwargs)
 

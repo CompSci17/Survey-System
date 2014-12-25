@@ -42,7 +42,6 @@ def survey_detail( request, pk, *args, **kwargs ):
 					for individualAnswer in answers:
 						answer.text = answer.text + individualAnswer + ", "
 					answer.text = answer.text[:-2]
-					answer.text = answer.text.replace("  ", "").replace(", ", "")
 
 				else:
 					answer.text = answers
@@ -95,6 +94,42 @@ def survey_results( request, pk, *args, **kwargs ):
  			output += """
 						</table>
 					   """
+		elif input_type == "order_of_importance":
+			question = Question.objects.get( pk = input_id )
+			choices = results.get_choices( question.choices )
+
+			output += """
+						<table class="importance">
+							<tr>
+								<th colspan="%d"> %s </th>
+							</tr>
+							<tr>
+								<th></th>
+					  """ % ( len( choices ) + 1, question.text )
+
+			for i, option in enumerate( choices ):
+				output += """
+								<th> %d </th>
+						  """ % ( i + 1 )
+
+			output += " </tr>"
+
+			for choice in choices:
+				output += """
+							<tr>
+								<td> %s </td>
+						  """ % ( choice )
+
+				for column in xrange( 1, len( choices ) + 1 ):
+					output += """
+								<td> %s </td>
+							  """ % ( answer[ column ][ choice.strip().replace( ",", "" ) ] )
+
+				output += """
+							</tr>
+						  """
+
+
 		else:
 			charts.append( answer )
 			chart_ids += "container_" + str( input_id ) + ","
@@ -105,7 +140,7 @@ def survey_results( request, pk, *args, **kwargs ):
 		"answers": answers,
 		"output": output,
 		"charts": charts,
-		"chart_ids": chart_ids
+		"chart_ids": chart_ids,
 	}
 
 	return render( request, template_name, context )
