@@ -125,6 +125,47 @@ input[type="submit"]{
   font-size: 1.3em;
 }
 
+div, table{
+  margin-bottom: 50px;
+}
+
+table{
+  border: 1px #5C5C61 solid;
+}
+
+table, td, tr, th{
+  width: 100%;
+}
+
+th{
+  font-size: 1.3em;
+  font-weight: 700;
+  border-bottom: 1px #5C5C61 solid;
+}
+
+tr:nth-of-type(2n){
+  background: aliceblue;
+}
+
+td{
+  text-align: center;
+  min-width: 40px;
+}
+
+tr>td:first-of-type{
+  text-align: left;
+}
+
+.importance tr>td:first-of-type{
+  border-right: 1px #5C5C61 solid;
+}
+
+.highest{
+  background: #5C5C61;
+  color: aliceblue;
+  padding: 5px;
+}
+
 @media(max-width: 800px){
   #wrapper{
     width: 100%;
