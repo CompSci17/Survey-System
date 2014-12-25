@@ -22,21 +22,30 @@ def survey_list( request, *args, **kwargs ):
 	return render( request, template_name, context )
 
 def survey_detail( request, pk, *args, **kwargs ):
+	# Get the survey we're working with
 	survey = Survey.objects.get( pk = pk, published = True )
+
+	# Get all the questions for the survey
 	questions = Question.objects.filter( survey__exact = survey ).order_by( "order" )
+
 	template_name = "survey_detail.html"
+
+	#Get the survey form
 	form = SurveyForm( request.POST or None, questions=questions )
 
 	if survey.single_vote and request.COOKIES.has_key( "survey_" + hashlib.sha256( str( survey.pk ) ).hexdigest() ):
+		# If the survey only allows 1 vote and the user has voted, load the thank you template
 		template_name = "thanks.html"
 	else:
 		# if this is a POST request we need to process the form data
 		if request.method == 'POST':
 			
-			# check whether it's valid:
 			if form.is_valid():
+				# If form is valid, process the input
+				
 				answers = []
 				for question in questions:
+					# For every question, process the answer and save it to the Answers model
 					answer = Answers( )
 					answer.survey = survey
 					answer.question = question
@@ -44,6 +53,7 @@ def survey_detail( request, pk, *args, **kwargs ):
 					answers = form.cleaned_data[ str( question.pk ) ]
 
 					if type( answers ) is list:
+						# If the input has multiple answers, concatenate them into a comma separated list
 						for individualAnswer in answers:
 							answer.text = answer.text + individualAnswer + ", "
 						answer.text = answer.text[:-2]
@@ -61,13 +71,19 @@ def survey_detail( request, pk, *args, **kwargs ):
 		"form": form,
 	}
 
+	# Create blank response
 	response = HttpResponse()
-	response = render( request, template_name, context )
-	if request.method == 'POST':
-		if form.is_valid():
-			if survey.single_vote:
-				response.set_cookie( "survey_" + hashlib.sha256( str( survey.pk ) ).hexdigest(), hashlib.sha256( str( survey.pk ) + ( survey.title ) ).hexdigest() , max_age = 30 * 24 * 60 * 60, httponly = True )
 
+	# Fill the response with the template render
+	response = render( request, template_name, context )
+
+
+	if request.method == 'POST' and form.is_valid() and survey.single_vote:
+		# If form is submitted, the form is valid and the survey only allows 1 vote:
+		# set a cookie to identify the user has voted
+		response.set_cookie( "survey_" + hashlib.sha256( str( survey.pk ) ).hexdigest(), hashlib.sha256( str( survey.pk ) + ( survey.title ) ).hexdigest() , max_age = 30 * 24 * 60 * 60, httponly = True )
+
+	# Return the rendered response
 	return response
 
 def survey_results( request, pk, *args, **kwargs ):
