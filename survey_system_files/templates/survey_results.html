@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block extra_js %}
+	<script type="text/javascript" src="/static/js/results.js" ></script>
 	<script type="text/javascript" src="http://code.highcharts.com/highcharts.js" ></script>
 	{% load chartit %}
 	{{ charts|load_charts:chart_ids }}
@@ -20,4 +21,5 @@
 	<section id="results">
 		{% autoescape off %}{{ output }}{% endautoescape %} 
 	</section>
+	
 {% endblock %}
