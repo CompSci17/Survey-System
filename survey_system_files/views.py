@@ -1,7 +1,8 @@
 import uuid
+import hashlib
 
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from .models import Survey, Question, Answers
 from .forms import SurveyForm
 from .results import Results
@@ -11,47 +12,48 @@ from .results import Results
 def survey_list( request, *args, **kwargs ):
 	survey_list = Survey.objects.filter( published = True )
 	template_name = "survey_list.html"
-
+	debug = str( request.COOKIES )
 	context = {
 		"survey_list": survey_list,
-		"page_title": "Surveys"
+		"page_title": "Surveys",
+		"debug": debug
 	}
 
 	return render( request, template_name, context )
 
 def survey_detail( request, pk, *args, **kwargs ):
 	survey = Survey.objects.get( pk = pk, published = True )
-	questions = Question.objects.filter( survey__exact = survey )
+	questions = Question.objects.filter( survey__exact = survey ).order_by( "order" )
 	template_name = "survey_detail.html"
 	form = SurveyForm( request.POST or None, questions=questions )
 
-	# if this is a POST request we need to process the form data
-	if request.method == 'POST':
-		
-		# check whether it's valid:
-		if form.is_valid():
-			answers = []
-			for question in questions:
-				answer = Answers( )
-				answer.survey = survey
-				answer.question = question
+	if survey.single_vote and request.COOKIES.has_key( "survey_" + hashlib.sha256( str( survey.pk ) ).hexdigest() ):
+		template_name = "thanks.html"
+	else:
+		# if this is a POST request we need to process the form data
+		if request.method == 'POST':
+			
+			# check whether it's valid:
+			if form.is_valid():
+				answers = []
+				for question in questions:
+					answer = Answers( )
+					answer.survey = survey
+					answer.question = question
 
-				answers = form.cleaned_data[ str( question.pk ) ]
+					answers = form.cleaned_data[ str( question.pk ) ]
 
-				if type( answers ) is list:
-					for individualAnswer in answers:
-						answer.text = answer.text + individualAnswer + ", "
-					answer.text = answer.text[:-2]
+					if type( answers ) is list:
+						for individualAnswer in answers:
+							answer.text = answer.text + individualAnswer + ", "
+						answer.text = answer.text[:-2]
 
-				else:
-					answer.text = answers
+					else:
+						answer.text = answers
 
-				answer.session_id = uuid.uuid1( ) 
-				answer.save()
-
-			# redirect to a new URL:
-			#return HttpResponseRedirect('/thanks/')
-
+					answer.session_id = uuid.uuid1( ) 
+					answer.save()
+				template_name = "thanks.html"
 
 	context = {
 		"survey" : survey,
@@ -59,7 +61,14 @@ def survey_detail( request, pk, *args, **kwargs ):
 		"form": form,
 	}
 
-	return render( request, template_name, context )
+	response = HttpResponse()
+	response = render( request, template_name, context )
+	if request.method == 'POST':
+		if form.is_valid():
+			if survey.single_vote:
+				response.set_cookie( "survey_" + hashlib.sha256( str( survey.pk ) ).hexdigest(), hashlib.sha256( str( survey.pk ) + ( survey.title ) ).hexdigest() , max_age = 30 * 24 * 60 * 60, httponly = True )
+
+	return response
 
 def survey_results( request, pk, *args, **kwargs ):
 	survey = Survey.objects.get( pk = pk, published = True )
@@ -84,14 +93,14 @@ def survey_results( request, pk, *args, **kwargs ):
 							</tr>
 					  """ % ( question.text )
 
- 			for indiv_answer in answer:
- 				output += """
+			for indiv_answer in answer:
+				output += """
 							<tr>
 								<td> %s </td>
 							</tr>
 						  """ % ( indiv_answer )
 
- 			output += """
+			output += """
 						</table>
 					   """
 		elif input_type == "order_of_importance":
