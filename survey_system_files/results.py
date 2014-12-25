@@ -164,20 +164,29 @@ class Results( ):
 				
 
 			elif question.input_type == 'checkbox':
+				# Get all the question's answers
 				answers = self.get_results( question )
+
+				# We'll use this to keep track of the answer count
 				counter = {}
+
+				# Get all the question's options/choices
 				options = self.get_choices( question.choices )
 
 				for option in options:
+					# initialise each option in the counter with 0
 					counter.update( { option.strip() : 0 } )
 
 				for answer in answers:
+					# Get a list of all the answers
 					delimited_answers = answer.text.split( "," )
 
 					for indiv_answer in delimited_answers:
+						# For every answer, increment it in the counter
 						counter[ indiv_answer.strip() ] += 1
 
 				for option in counter:
+					# Check if the question already has a count going in the database
 					existence_check = CheckboxResults.objects.filter(
 										survey__exact = survey, 
 										question__exact = question, 
@@ -185,6 +194,7 @@ class Results( ):
 									)
 
 					if existence_check.exists():
+						# If it exists, just update it
 						result = CheckboxResults(
 									pk = existence_check[0].pk,
 									survey = survey,
@@ -193,39 +203,51 @@ class Results( ):
 									answer_count = counter[ option.strip() ]
 								)
 					else:
+						# If it doesn't exist, create it
 						result = CheckboxResults(
 									survey = survey,
 									question = question,
 									answer = option,
 									answer_count = counter[ option.strip() ]
 								)
+
+					# Save the result in the model
 					result.save()
 				
+				# Create new bar chart
 				bar_chart = self.checkbox_bar_chart( question )
+
+				# Append the checkbox details to the returned output
 				output.append( ( "checkbox", bar_chart, question.pk ) )
 
 			elif question.input_type == 'order':
-				# TODO
+				# Get all the question's options
 				options = self.get_choices( question.choices )
 
+				# Get the number of options
 				number_of_options = len( options )
 
+				# We'll use this to keep track of the answer count
 				counter = {}
 
 				for integer_counter in range( 1, number_of_options + 1 ):
+					# Initialise dict using integers with their own dictionaries
 					counter.update( { integer_counter: { } } )
 					for option in options:
+						# For every option, initialise the above integer's dicts with the option's counter at 0
 						counter[ integer_counter ].update( { str( option ).strip().replace( ",", "" ) : 0 } )
 
+				# Get the question's answers
 				answers = self.get_results( question )
 
 				for answer in answers:
+					# For every answer, split it at every comma
 					split_answers = answer.text.split( "," )
 					for i, result in enumerate( split_answers ):
+						# Increment the choice's counter by 1
 						counter[ i + 1 ][ result.strip().replace( ",", "" ) ] += 1
 
 				for position in counter:
-
 					for option in counter[ position ]:
 						existence_check = ImportanceOrderResults.objects.filter(
 											survey__exact = survey, 
@@ -355,37 +377,10 @@ class Results( ):
 			)
 		return chart
 
-	def order_of_importance_chart( request, question, position ):
-		ds = DataPool(
-		       series=
-		        [{'options': {
-		            'source': ImportanceOrderResults.objects.filter( question__exact = question, answer_position__exact = position )},
-		          'terms': [
-		            'answer_position',
-		            'answer', 
-		            'answer_count']}
-		         ])
-
-		chart = Chart(
-		        datasource = ds, 
-		        series_options = 
-		          [{'options':{
-		              'type': 'bar',
-		              'stacking': True,
-		              'stack': 0},
-		            'terms':{
-		              'answer_position': [
-		                'answer_count',]
-		              }}],
-		        chart_options = 
-		          {'title': {
-		               'text': question.text },
-		           'xAxis': {
-		                'title': {
-		                   'text': 'Answer Position'}}})
-		return chart
-
 	def checkbox_bar_chart( request, question ):
+		"""
+		@return Barchart for checkbox results
+		"""
 		ds = DataPool(
 		       series=
 		        [{'options': {
