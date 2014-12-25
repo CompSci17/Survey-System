@@ -7,7 +7,7 @@ from .models import Survey, Question
 
 class SurveyAdmin( admin.ModelAdmin ):
 	date_hierarchy = "created_at"
-	fields = ( "published", "title", "slug" )
+	fields = ( "published", "title", "slug", "single_vote" )
 	list_display = [ "published", "title", "created_at", "updated_at" ]
 	list_display_links = [ "title" ]
 	list_editable = [ "published" ]

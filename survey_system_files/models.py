@@ -9,7 +9,7 @@ class Survey(models.Model):
 	title = models.CharField( max_length = 255 )
 	slug = models.SlugField( max_length = 255, blank = True, default = '' )
 	published = models.BooleanField( default = True )
-	author = models.ForeignKey( User, related_name = "surveys" )
+	single_vote = models.BooleanField( default = True )
 
 	def __unicode__(self):
 		return self.title
