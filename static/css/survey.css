@@ -166,6 +166,12 @@ tr>td:first-of-type{
   padding: 5px;
 }
 
+meter{ 
+  width: 100%;
+  background: none;
+  background-color: #90ED7D;
+}
+
 @media(max-width: 800px){
   #wrapper{
     width: 100%;

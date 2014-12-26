@@ -123,37 +123,25 @@ def survey_results( request, pk, *args, **kwargs ):
 			question = Question.objects.get( pk = input_id )
 			choices = results.get_choices( question.choices )
 
-			output += """
-						<table class="importance">
-							<tr>
-								<th colspan="%d"> %s </th>
-							</tr>
-							<tr>
-								<th></th>
-					  """ % ( len( choices ) + 1, question.text )
+			counter = []
+			max_score = 0
 
-			for i, option in enumerate( choices ):
-				output += """
-								<th> %d </th>
-						  """ % ( i + 1 )
-
-			output += " </tr>"
+			output += "<h2>" + question.text + "</h2>"
 
 			for choice in choices:
-				output += """
-							<tr>
-								<td> %s </td>
-						  """ % ( choice )
+				answer_score = 0
 
 				for column in xrange( 1, len( choices ) + 1 ):
-					output += """
-								<td> %s </td>
-							  """ % ( answer[ column ][ choice.strip().replace( ",", "" ) ] )
+					answer_score += ( len( choices ) + 1 - column ) * int( answer[ column ][ choice.strip().replace( ",", "" ) ] )
 
-				output += """
-							</tr>
-						  """
+					max_score = answer_score if answer_score > max_score else max_score
 
+				counter.append( ( choice.strip().replace( ",", "" ), answer_score ) )
+
+			counter = sorted( counter, key=lambda answer: answer[1], reverse = True )
+
+			for answer, score in counter:
+				output += str( answer ) + '<br /> <meter value="' + str( score ) + '" min="0" max="' + str( max_score ) + '" >' + str( score ) + '</meter> <br /><br />'
 
 		else:
 			charts.append( answer )
