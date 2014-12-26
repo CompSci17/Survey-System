@@ -1,6 +1,7 @@
 {% extends "_layouts/base.html" %}
 
 {% block page_title %}{{ page_title }}{% endblock %}
+{% block facebook__title %}{{ page_title }}{% endblock %}
 
 {% block extra_js %}
 	<script type="text/javascript" src="/static/js/survey.js" ></script>
@@ -9,7 +10,7 @@
 {% block page_content %}
 
 	<h1> {{ page_title }} </h1>
-	<p> {{ survey.updated_at }}</p>
+	<p> {{ survey.updated_at|date:"dS, M Y" }}</p>
 
 	<form action="" method="post">{% csrf_token %}
 		{% for field in form %}
