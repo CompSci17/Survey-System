@@ -102,23 +102,25 @@ def survey_results( request, pk, *args, **kwargs ):
 		if input_type == "text" or input_type == "textarea":
 
 			question = Question.objects.get( pk = input_id )
-			output += """
-						<table>
-							<tr>
-								<th> %s </th>
-							</tr>
-					  """ % ( question.text )
 
-			for indiv_answer in answer:
+			if "email" not in question.text:
 				output += """
-							<tr>
-								<td> %s </td>
-							</tr>
-						  """ % ( indiv_answer )
+							<table>
+								<tr>
+									<th> %s </th>
+								</tr>
+						  """ % ( question.text )
 
-			output += """
-						</table>
-					   """
+				for indiv_answer in answer:
+					output += """
+								<tr>
+									<td> %s </td>
+								</tr>
+							  """ % ( indiv_answer )
+
+				output += """
+							</table>
+						   """
 		elif input_type == "order_of_importance":
 			question = Question.objects.get( pk = input_id )
 			choices = results.get_choices( question.choices )
