@@ -1,4 +1,4 @@
-Django==1.7.1
+django>=1.11.18
 South==1.0.1
 argparse==1.2.1
 django-chartit==0.1
